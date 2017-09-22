@@ -214,6 +214,30 @@ func NewRRule(arg ROption) (*RRule, error) {
 	return &r, nil
 }
 
+func (r *RRule) dupFrom(src *RRule) {
+	r.OrigOptions = src.OrigOptions
+	r.freq = src.freq
+	r.dtstart = src.dtstart
+	r.interval = src.interval
+	r.wkst = src.wkst
+	r.count = src.count
+	r.until = src.until
+	r.bysetpos = src.bysetpos
+	r.bymonth = src.bymonth
+	r.bymonthday = src.bymonthday
+	r.bynmonthday = src.bynmonthday
+	r.byyearday = src.byyearday
+	r.byweekno = src.byweekno
+	r.byweekday = src.byweekday
+	r.bynweekday = src.bynweekday
+	r.byhour = src.byhour
+	r.byminute = src.byminute
+	r.bysecond = src.bysecond
+	r.byeaster = src.byeaster
+	r.timeset = src.timeset
+	r.len = src.len
+}
+
 type iterInfo struct {
 	rrule       *RRule
 	lastyear    int
