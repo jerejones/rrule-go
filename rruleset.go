@@ -1,7 +1,10 @@
 package rrule
 
 import (
+	"errors"
+	"fmt"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -40,6 +43,56 @@ func (set *Set) ExRule(exrule *RRule) {
 // even if some inclusive rrule or rdate matches them.
 func (set *Set) ExDate(exdate time.Time) {
 	set.exdate = append(set.exdate, exdate)
+}
+
+func (set *Set) add(spec string) error {
+	spec = strings.TrimSpace(spec)
+	if spec == "" {
+		return nil
+	}
+	temp := strings.SplitN(spec, ":", 2)
+	if len(temp) != 2 {
+		return errors.New("bad format")
+	}
+	name, value := temp[0], temp[1]
+	parms := strings.Split(name, ";")
+	name = parms[0]
+	parms = parms[1:]
+	switch name {
+	case "RRULE", "EXRULE":
+		for _, parm := range parms {
+			return fmt.Errorf("unsupported RRULE/EXRULE parm: %v", parm)
+		}
+		r, err := StrToRRule(value)
+		if err != nil {
+			return fmt.Errorf("strToRRule failed: %v", err)
+		}
+		if name == "RRULE" {
+			set.RRule(r)
+		} else {
+			set.ExRule(r)
+		}
+	case "RDATE", "EXDATE":
+		for _, parm := range parms {
+			if parm != "VALUE=DATE-TIME" {
+				return fmt.Errorf("unsupported RDATE/EXDATE parm: %v", parm)
+			}
+		}
+		for _, datestr := range strings.Split(value, ",") {
+			t, err := strToTime(datestr)
+			if err != nil {
+				return fmt.Errorf("strToTime failed: %v", err)
+			}
+			if name == "RDATE" {
+				set.RDate(t)
+			} else {
+				set.ExDate(t)
+			}
+		}
+	default:
+		return fmt.Errorf("unsupported property: %v", name)
+	}
+	return nil
 }
 
 type genItem struct {
