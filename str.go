@@ -200,6 +200,23 @@ func (r *RRule) String() string {
 	return r.OrigOptions.String()
 }
 
+func (s *Set) String() string {
+	ret := make([]string, 0, len(s.rrule)+len(s.rdate)+len(s.exrule)+len(s.exdate))
+	for _, r := range s.rrule {
+		ret = append(ret, "RRULE:"+r.String())
+	}
+	for _, r := range s.rdate {
+		ret = append(ret, "RDATE:"+timeToStr(r))
+	}
+	for _, r := range s.exrule {
+		ret = append(ret, "EXRULE:"+r.String())
+	}
+	for _, r := range s.exdate {
+		ret = append(ret, "EXDATE:"+timeToStr(r))
+	}
+	return strings.Join(ret, "\n")
+}
+
 // StrToRRule converts string to RRule
 func StrToRRule(rfcString string) (*RRule, error) {
 	option, e := StrToROption(rfcString)

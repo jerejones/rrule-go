@@ -36,12 +36,23 @@ func TestStrToRRuleSet(t *testing.T) {
 RDATE:20121201T093000Z
 EXRULE:FREQ=WEEKLY;DTSTART=20120208T093000Z;BYDAY=MO,TU,WE,TH,FR;COUNT=3
 EXDATE:20120203T093000Z`
-	r, err := StrToRRuleSet(str)
+	s, err := StrToRRuleSet(str)
 	if err != nil {
 		t.Errorf("StrToRRule(%q) error: %v", str, err)
 	}
 
-	if len(r.All()) != 7 {
-		t.Errorf("len(StrToRRule(%q)) = %d, want %d", str, len(r.All()), 7)
+	if len(s.All()) != 7 {
+		t.Errorf("len(StrToRRule(%q)) = %d, want %d", str, len(s.All()), 7)
+	}
+}
+
+func TestSet_String(t *testing.T) {
+	str := `RRULE:FREQ=WEEKLY;DTSTART=20120201T093000Z;COUNT=10;BYDAY=MO,TU,WE,TH,FR
+RDATE:20121201T093000Z
+EXRULE:FREQ=WEEKLY;DTSTART=20120208T093000Z;COUNT=3;BYDAY=MO,TU,WE,TH,FR
+EXDATE:20120203T093000Z`
+	set, _ := StrToRRuleSet(str)
+	if s := set.String(); s != str {
+		t.Errorf("StrToRRuleSet(%q).String() = %q, want %q", str, s, str)
 	}
 }
