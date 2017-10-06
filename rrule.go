@@ -3,6 +3,7 @@ package rrule
 import (
 	"errors"
 	"sort"
+	"sync"
 	"time"
 )
 
@@ -99,6 +100,8 @@ type ROption struct {
 // RRule offers a small, complete, and very fast, implementation of the recurrence rules
 // documented in the iCalendar RFC, including support for caching of results.
 type RRule struct {
+	sync.Mutex
+
 	OrigOptions             ROption
 	freq                    Frequency
 	dtstart                 time.Time
@@ -501,6 +504,9 @@ type rIterator struct {
 
 func (iterator *rIterator) generate() {
 	r := iterator.ii.rrule
+	r.Lock()
+	defer r.Unlock()
+
 	for len(iterator.remain) == 0 {
 		// Get dayset with the right frequency
 		dayset, start, end := iterator.ii.getdayset(r.freq, iterator.year, iterator.month, iterator.day)

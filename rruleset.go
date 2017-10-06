@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 )
 
 // Set allows more complex recurrence setups, mixing multiple rules, dates, exclusion rules, and exclusion dates
 type Set struct {
+	sync.Mutex
+
 	rrule  []*RRule
 	rdate  []time.Time
 	exrule []*RRule
@@ -118,6 +121,7 @@ func (set *Set) Iterator() (next func() (time.Time, bool)) {
 	rlist := []genItem{}
 	exlist := []genItem{}
 
+	set.Lock()
 	sort.Sort(timeSlice(set.rdate))
 	addGenList(&rlist, timeSliceIterator(set.rdate))
 	for _, r := range set.rrule {
@@ -131,6 +135,7 @@ func (set *Set) Iterator() (next func() (time.Time, bool)) {
 		addGenList(&exlist, r.Iterator())
 	}
 	sort.Sort(genItemSlice(exlist))
+	set.Unlock()
 
 	lastdt := time.Time{}
 	return func() (time.Time, bool) {
